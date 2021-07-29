@@ -11,9 +11,9 @@ class TomTest {
     AggregateTestFixture<Tom> fixture = new AggregateTestFixture<>(Tom.class);
 
     fixture
-        .givenNoPriorActivity()
-        .when(new CreateTomCommand("tom1", "NotTom"))
-        .expectException(IllegalArgumentException.class);
+        .givenCommands(new UpdateTomCommand("tom1", "Tom"), new DeleteTomCommand("tom1"))
+        .when(new UpdateTomCommand("tom1", "Back from the dead"))
+        .expectEvents(new TomCreatedEvent("tom1"), new TomUpdatedEvent("tom1", "Back from the dead"));
   }
 
 }

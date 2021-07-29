@@ -19,26 +19,39 @@ public class Tom {
 
   public Tom(){}
 
-  @CommandHandler
-  @CreationPolicy(AggregateCreationPolicy.CREATE_IF_MISSING)
-  public void handle(CreateTomCommand command) {
-    AggregateLifecycle.apply(new TomCreatedEvent(command.getId(), command.getName()));
-  }
-
-  @CommandHandlerInterceptor
-  public void intercept(CreateTomCommand event,
-                        InterceptorChain interceptorChain) throws Exception {
-
-    if (!this.name.equals(event.getName())) {
-      throw new IllegalArgumentException("Toms name is wrong");
-    }
-    interceptorChain.proceed();
-  }
+//  @CommandHandler
+//  @CreationPolicy(AggregateCreationPolicy.CREATE_IF_MISSING)
+//  public void handle(CreateTomCommand command) throws Exception {
+//    AggregateLifecycle.apply(new TomCreatedEvent(command.getId()));
+//  }
 
   @EventSourcingHandler
   public void on(TomCreatedEvent event) {
     this.id = event.getId();
     this.name = name;
+  }
+
+  @CommandHandler
+  @CreationPolicy(AggregateCreationPolicy.CREATE_IF_MISSING)
+  public void handle(UpdateTomCommand command) throws Exception {
+    AggregateLifecycle.apply(new TomCreatedEvent(command.getId()));
+    AggregateLifecycle.apply(new TomUpdatedEvent(command.getId(), command.getName()));
+  }
+
+  @EventSourcingHandler
+  public void on(TomUpdatedEvent event) {
+    this.name = name;
+  }
+
+
+  @CommandHandler
+  public void handle(DeleteTomCommand command) throws Exception {
+    AggregateLifecycle.apply(new TomDeletedEvent(command.getId()));
+  }
+
+  @EventSourcingHandler
+  public void on(TomDeletedEvent event) {
+    AggregateLifecycle.markDeleted();
   }
 
 
